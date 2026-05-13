@@ -1,230 +1,67 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>S7ADOW API | Dashboard</title>
-    <style>
-        :root {
-            --bg: #0a0a0a;
-            --card: #161616;
-            --accent: #00f2ff;
-            --text: #ffffff;
-        }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-        /* القائمة الجانبية */
-        .sidebar {
-            width: 260px;
-            background: var(--card);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            border-left: 1px solid #333;
-        }
-        .sidebar h2 {
-            color: var(--accent);
-            text-align: center;
-            font-size: 24px;
-            margin-bottom: 30px;
-        }
-        .nav-item {
-            padding: 15px;
-            margin: 5px 0;
-            cursor: pointer;
-            border-radius: 8px;
-            transition: 0.2s;
-            font-weight: bold;
-        }
-        .nav-item:hover, .nav-item.active {
-            background: var(--accent);
-            color: #000;
-        }
-
-        /* المحتوى الرئيسي */
-        .main {
-            flex: 1;
-            padding: 30px;
-            overflow-y: auto;
-        }
-        .section { display: none; animation: fadeIn 0.4s; }
-        .section.active { display: block; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .card {
-            background: var(--card);
-            padding: 25px;
-            border-radius: 15px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            background: #222;
-            border: 1px solid #444;
-            color: white;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            box-sizing: border-box;
-        }
-
-        button {
-            background: var(--accent);
-            color: black;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-
-        .api-box {
-            background: #000;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-right: 4px solid var(--accent);
-        }
-
-        code { color: #00ffcc; font-size: 0.9em; }
-    </style>
+  <title>S7ADOW API</title>
+  <style>
+    body { font-family: Arial; background:#111; color:#fff; text-align:center }
+    input, button { padding:10px; margin:5px; border:none }
+    button { background:#00ffcc; cursor:pointer }
+  </style>
 </head>
 <body>
 
-    <div class="sidebar">
-        <h2>S7ADOW</h2>
-        <div class="nav-item active" onclick="showSection('home')">🏠 الرئيسية</div>
-        <div class="nav-item" onclick="showSection('youtube')">🎬 YouTube</div>
-        <div class="nav-item" onclick="showSection('tiktok')">📱 TikTok</div>
-        <div class="nav-item" onclick="showSection('spotify')">🎵 Spotify</div>
-        <div class="nav-item" onclick="showSection('pinterest')">🖼️ Pinterest</div>
-        <div class="nav-item" onclick="showSection('api_docs')">⚙️ APIs</div>
-    </div>
+<h1>🔥 S7ADOW API</h1>
 
-    <div class="main">
-        
-        <div id="home" class="section active">
-            <div style="text-align: center; margin-top: 50px;">
-                <h1>🔥 S7ADOW API</h1>
-                <p>مرحباً بك.. جميع خدماتك جاهزة في القائمة الجانبية.</p>
-            </div>
-        </div>
+<!-- 🔍 البحث -->
+<h2>بحث يوتيوب</h2>
+<input id="search" placeholder="اكتب اسم">
+<button onclick="searchYT()">بحث</button>
 
-        <div id="youtube" class="section">
-            <div class="card">
-                <h2>بحث وتحميل YouTube</h2>
-                <input type="text" id="yt_input" placeholder="اكتب اسم الفيديو أو الرابط...">
-                <button onclick="searchYT()">بحث</button>
-                <button style="background:#ff4444" onclick="downloadVideo()">تحميل فيديو من رابط</button>
-                <div id="yt_results"></div>
-            </div>
-        </div>
+<div id="results"></div>
 
-        <div id="tiktok" class="section">
-            <div class="card">
-                <h2>تحميل TikTok (بدون علامة)</h2>
-                <input type="text" id="tk_url" placeholder="ضع رابط الفيديو هنا...">
-                <button onclick="dlTikTok()">تحميل</button>
-                <div id="tk_result"></div>
-            </div>
-        </div>
+<!-- 📥 تحميل -->
+<h2>تحميل من رابط</h2>
+<input id="url" placeholder="حط الرابط">
+<button onclick="downloadVideo()">تحميل فيديو</button>
 
-        <div id="spotify" class="section">
-            <div class="card">
-                <h2>بحث Spotify</h2>
-                <input type="text" id="sp_query" placeholder="اسم الأغنية أو الفنان...">
-                <button onclick="searchSpotify()">بحث</button>
-                <div id="sp_results"></div>
-            </div>
-        </div>
+<!-- 🔗 APIs -->
+<h2>APIs</h2>
 
-        <div id="pinterest" class="section">
-            <div class="card">
-                <h2>بحث Pinterest</h2>
-                <input type="text" id="pin_query" placeholder="ابحث عن صور...">
-                <button onclick="searchPinterest()">بحث صور</button>
-                <div id="pin_results"></div>
-            </div>
-        </div>
+<div>
+  <p>/api/youtube/search?q=TEXT</p>
+  <button onclick="copy('/api/youtube/search?q=test')">نسخ</button>
+</div>
 
-        <div id="api_docs" class="section">
-            <div class="card">
-                <h2>وثائق الروابط (APIs)</h2>
-                <div class="api-box"><code>/api/youtube/search?q=TEXT</code> <button onclick="copy('/api/youtube/search?q=test')" style="width:auto">نسخ</button></div>
-                <div class="api-box"><code>/api/youtube/video?url=LINK</code> <button onclick="copy('/api/youtube/video?url=link')" style="width:auto">نسخ</button></div>
-                <div class="api-box"><code>/api/tiktok?url=LINK</code> <button onclick="copy('/api/tiktok?url=link')" style="width:auto">نسخ</button></div>
-                <div class="api-box"><code>/api/spotify/search?q=TEXT</code> <button onclick="copy('/api/spotify/search?q=test')" style="width:auto">نسخ</button></div>
-                <div class="api-box"><code>/api/pinterest/search?q=TEXT</code> <button onclick="copy('/api/pinterest/search?q=test')" style="width:auto">نسخ</button></div>
-            </div>
-        </div>
+<div>
+  <p>/api/youtube/video?url=LINK</p>
+  <button onclick="copy('/api/youtube/video?url=link')">نسخ</button>
+</div>
 
-    </div>
+<script>
+function copy(text){
+  navigator.clipboard.writeText(window.location.origin + text)
+  alert("تم النسخ ✅")
+}
 
-    <script>
-        function showSection(id) {
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            event.currentTarget.classList.add('active');
-        }
+async function searchYT(){
+  let q = document.getElementById("search").value
+  let res = await fetch("/api/youtube/search?q=" + q)
+  let data = await res.json()
 
-        function copy(text){
-            navigator.clipboard.writeText(window.location.origin + text);
-            alert("تم النسخ ✅");
-        }
+  let html = ""
+  data.forEach(v=>{
+    html += `<p>${v.title}<br>
+    <button onclick="copy('${v.url}')">نسخ الرابط</button></p>`
+  })
 
-        async function searchYT(){
-            let q = document.getElementById("yt_input").value;
-            let res = await fetch("/api/youtube/search?q=" + q);
-            let data = await res.json();
-            let html = "";
-            data.forEach(v => { html += `<div class="api-box"><span>${v.title}</span><button onclick="copy('${v.url}')" style="width:auto">نسخ الرابط</button></div>`; });
-            document.getElementById("yt_results").innerHTML = html;
-        }
+  document.getElementById("results").innerHTML = html
+}
 
-        function downloadVideo(){
-            let url = document.getElementById("yt_input").value;
-            window.open("/api/youtube/video?url=" + url);
-        }
+function downloadVideo(){
+  let url = document.getElementById("url").value
+  window.open("/api/youtube/video?url=" + url)
+}
+</script>
 
-        async function dlTikTok(){
-            let url = document.getElementById("tk_url").value;
-            let r = await fetch(`/api/tiktok?url=${url}`);
-            let d = await r.json();
-            document.getElementById("tk_result").innerHTML = `<a href="${d.video}" target="_blank" style="color:cyan">اضغط هنا للتحميل</a>`;
-        }
-
-        async function searchSpotify(){
-            let q = document.getElementById("sp_query").value;
-            let res = await fetch("/api/spotify/search?q=" + q);
-            let data = await res.json();
-            document.getElementById("sp_results").innerHTML = `<pre style="font-size:10px">${JSON.stringify(data, null, 2)}</pre>`;
-        }
-
-        async function searchPinterest(){
-            let q = document.getElementById("pin_query").value;
-            let res = await fetch("/api/pinterest/search?q=" + q);
-            let data = await res.json();
-            document.getElementById("pin_results").innerHTML = `<pre style="font-size:10px">${JSON.stringify(data, null, 2)}</pre>`;
-        }
-    </script>
 </body>
 </html>
