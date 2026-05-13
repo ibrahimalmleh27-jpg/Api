@@ -1,4 +1,4 @@
-// حل مشكلة البيئة في Railway
+// حل مشكلة ReferenceError: File is not defined في Railway
 import { File, Blob } from 'node:buffer';
 if (!global.File) global.File = File;
 if (!global.Blob) global.Blob = Blob;
@@ -11,28 +11,38 @@ import ytdl from "ytdl-core";
 const app = express();
 app.use(express.static("public"));
 
+// دالة مساعدة لجلب البيانات من الـ APIs الخارجية
 const fetchData = async (url) => {
     const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     return await response.json();
 };
 
-/* ================== YOUTUBE (تحديث جديد) ================== */
+/* ================== YOUTUBE ================== */
 
-// 1. بحث وتشغيل أغاني مباشرة
+// 1. بحث وتشغيل أغاني (هذا المسار الذي يستخدمه البوت)
 app.get("/api/youtube/play-audio", async (req, res) => {
   try {
     let q = req.query.q;
-    if (!q) return res.json({ error: "اكتب اسم الأغنية" });
+    // التحقق من وجود نص البحث لمنع رسالة الخطأ التي ظهرت لك
+    if (!q || q.trim() === "") {
+        return res.status(400).json({ error: "يرجى إدخال اسم الأغنية للبحث" });
+    }
+
     let r = await yts(q);
+    if (!r.videos || r.videos.length === 0) {
+        return res.json({ error: "❌ مفيش نتيجة" });
+    }
+
     let video = r.videos[0]; 
     res.json({
       title: video.title,
       thumbnail: video.thumbnail,
-      audio_url: `/api/youtube/audio-stream?url=${encodeURIComponent(video.url)}`
+      audio_url: `${req.protocol}://${req.get('host')}/api/youtube/audio-stream?url=${encodeURIComponent(video.url)}`
     });
   } catch (e) {
-    res.status(500).json({ error: "خطأ في تشغيل الأغنية" });
+    console.error(e);
+    res.status(500).json({ error: "حدث خطأ في الخادم" });
   }
 });
 
@@ -40,32 +50,32 @@ app.get("/api/youtube/play-audio", async (req, res) => {
 app.get("/api/youtube/play-video", async (req, res) => {
   try {
     let q = req.query.q;
-    if (!q) return res.json({ error: "اكتب اسم الفيديو" });
+    if (!q) return res.status(400).json({ error: "اكتب اسم الفيديو" });
+    
     let r = await yts(q);
+    if (r.videos.length === 0) return res.json({ error: "❌ مفيش نتيجة" });
+    
     let video = r.videos[0];
     res.json({
       title: video.title,
       thumbnail: video.thumbnail,
-      video_url: `/api/youtube/stream?url=${encodeURIComponent(video.url)}`
+      video_url: `${req.protocol}://${req.get('host')}/api/youtube/stream?url=${encodeURIComponent(video.url)}`
     });
-  } catch (e) {
-    res.status(500).json({ error: "خطأ في تشغيل الفيديو" });
-  }
+  } catch (e) { res.status(500).json({ error: "خطأ في الفيديو" }); }
 });
 
 // 3. تحميل يوتيوب بالرابط
 app.get("/api/youtube/download", async (req, res) => {
   try {
     let url = req.query.url;
+    if(!url) return res.status(400).json({ error: "ضع الرابط" });
     let info = await ytdl.getInfo(url);
     res.json({
       title: info.videoDetails.title,
-      video: `/api/youtube/stream?url=${encodeURIComponent(url)}`,
-      audio: `/api/youtube/audio-stream?url=${encodeURIComponent(url)}`
+      video: `${req.protocol}://${req.get('host')}/api/youtube/stream?url=${encodeURIComponent(url)}`,
+      audio: `${req.protocol}://${req.get('host')}/api/youtube/audio-stream?url=${encodeURIComponent(url)}`
     });
-  } catch (e) {
-    res.status(500).json({ error: "الرابط غير صحيح أو محمي" });
-  }
+  } catch (e) { res.status(500).json({ error: "الرابط غير صحيح" }); }
 });
 
 // Stream Helpers
