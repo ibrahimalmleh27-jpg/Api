@@ -97,7 +97,8 @@ app.get("/", (req, res) => {
 });
 
 // إعدادات المنفذ لـ Railway
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🔥 S7ADOW API IS READY ON PORT ${PORT}`);
-});
+const PORT = process.env.PORT || 3000
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT)
+})
