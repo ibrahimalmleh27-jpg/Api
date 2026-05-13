@@ -1,4 +1,4 @@
-// حل مشكلة File / Blob
+// حل مشكلة تعريفات File و Blob لضمان استقرار السيرفر
 import { File, Blob } from 'node:buffer';
 if (!global.File) global.File = File;
 if (!global.Blob) global.Blob = Blob;
@@ -11,11 +11,11 @@ import ytdl from "ytdl-core";
 const app = express();
 app.use(express.static("public"));
 
-/* 🔥 حماية من الكراش */
+/* حماية السيرفر من الانهيار */
 process.on("uncaughtException", console.error);
 process.on("unhandledRejection", console.error);
 
-// دالة fetch محسنة
+// دالة جلب البيانات من الـ APIs الخارجية
 const fetchData = async (url) => {
   const response = await fetch(url, {
     headers: { 'User-Agent': 'Mozilla/5.0' }
@@ -26,7 +26,7 @@ const fetchData = async (url) => {
 
 /* ================== YOUTUBE ================== */
 
-// 🔍 تشغيل صوت (معدل لروابط البوتات)
+// بحث وتشغيل صوت (رابط مباشر للبوتات)
 app.get("/api/youtube/play-audio", async (req, res) => {
   try {
     let q = req.query.q;
@@ -40,7 +40,7 @@ app.get("/api/youtube/play-audio", async (req, res) => {
       status: true,
       title: video.title,
       thumbnail: video.thumbnail,
-      // الرابط بصيغة الـ API التي طلبتها لبوتات واتساب
+      // الرابط المباشر الذي يحتاجه بوت الواتساب
       audio_url: `${req.protocol}://${req.get("host")}/api/youtube/audio-stream?url=${encodeURIComponent(video.url)}`
     });
   } catch (e) {
@@ -48,7 +48,7 @@ app.get("/api/youtube/play-audio", async (req, res) => {
   }
 });
 
-// 🎬 تشغيل فيديو (معدل لروابط البوتات)
+// بحث وتشغيل فيديو (رابط مباشر للبوتات)
 app.get("/api/youtube/play-video", async (req, res) => {
   try {
     let q = req.query.q;
@@ -69,7 +69,7 @@ app.get("/api/youtube/play-video", async (req, res) => {
   }
 });
 
-// 📥 تحميل من رابط (معدل لروابط البوتات)
+// تحميل من رابط يوتيوب
 app.get("/api/youtube/download", async (req, res) => {
   try {
     let url = req.query.url;
@@ -87,11 +87,11 @@ app.get("/api/youtube/download", async (req, res) => {
   }
 });
 
-// 🔥 Stream (بدون تعديل - لمعالجة الطلبات)
+// Stream (الذي يقوم بعملية التحميل الفعلية)
 app.get("/api/youtube/stream", (req, res) => {
   try {
     ytdl(req.query.url, { filter: "audioandvideo", quality: "highest" })
-    .on("error", err => res.status(500).send(err.toString()))
+    .on("error", err => res.status(500).send("Stream Error"))
     .pipe(res);
   } catch { res.status(500).send("Stream error"); }
 });
@@ -99,12 +99,12 @@ app.get("/api/youtube/stream", (req, res) => {
 app.get("/api/youtube/audio-stream", (req, res) => {
   try {
     ytdl(req.query.url, { filter: "audioonly" })
-      .on("error", err => res.status(500).send(err.toString()))
+      .on("error", err => res.status(500).send("Audio Error"))
       .pipe(res);
   } catch { res.status(500).send("Audio error"); }
 });
 
-/* ================== بقية الـ APIs (تيك توك، سبوتيفاي، بينترست) ================== */
+/* ================== بقية الـ APIs ================== */
 
 app.get("/api/tiktok", async (req, res) => {
   try {
@@ -133,100 +133,4 @@ app.get("/api/pinterest/search", async (req, res) => {
 app.get("/", (req, res) => { res.sendFile(process.cwd() + "/public/index.html"); });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => { console.log("🔥 Server Running on " + PORT); });
-    res.status(500).json({ error: "رابط غير صالح" });
-  }
-});
-
-// 🔥 Stream (مصلح)
-app.get("/api/youtube/stream", (req, res) => {
-  try {
-    ytdl(req.query.url, {
-      filter: "audioandvideo",
-      quality: "highest"
-    })
-    .on("error", err => res.status(500).send(err.toString()))
-    .pipe(res);
-  } catch {
-    res.status(500).send("Stream error");
-  }
-});
-
-app.get("/api/youtube/audio-stream", (req, res) => {
-  try {
-    ytdl(req.query.url, { filter: "audioonly" })
-      .on("error", err => res.status(500).send(err.toString()))
-      .pipe(res);
-  } catch {
-    res.status(500).send("Audio error");
-  }
-});
-
-/* ================== TIKTOK ================== */
-
-app.get("/api/tiktok", async (req, res) => {
-  try {
-    let url = req.query.url;
-    if (!url) return res.json({ error: "حط الرابط" });
-
-    let d = await fetchData(`https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(url)}`);
-
-    res.json({
-      status: true,
-      video: d?.video?.noWatermark || null
-    });
-
-  } catch {
-    res.status(500).json({ error: "TikTok error" });
-  }
-});
-
-/* ================== SPOTIFY ================== */
-
-app.get("/api/spotify/search", async (req, res) => {
-  try {
-    let q = req.query.q;
-    if (!q) return res.json({ error: "اكتب بحث" });
-
-    let d = await fetchData(`https://api.ootaizumi.web.id/downloader/spotifyplay?query=${encodeURIComponent(q)}`);
-
-    res.json({
-      status: true,
-      result: d.result || d
-    });
-
-  } catch {
-    res.status(500).json({ error: "Spotify error" });
-  }
-});
-
-/* ================== PINTEREST ================== */
-
-app.get("/api/pinterest/search", async (req, res) => {
-  try {
-    let q = req.query.q;
-    if (!q) return res.json({ error: "اكتب بحث" });
-
-    let d = await fetchData(`https://api.boxi.my.id/api/pinterest?q=${encodeURIComponent(q)}`);
-
-    res.json({
-      status: true,
-      result: d.result || d
-    });
-
-  } catch {
-    res.status(500).json({ error: "Pinterest error" });
-  }
-});
-
-/* ================== MAIN ================== */
-
-app.get("/", (req, res) => {
-  res.sendFile(process.cwd() + "/public/index.html");
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("🔥 Server Running on " + PORT);
-});
+app.listen(PORT, () => { console.log("🔥 S7ADOW API LIVE ON " + PORT); });
