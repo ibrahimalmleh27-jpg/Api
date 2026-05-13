@@ -1,4 +1,4 @@
-// حل مشكلة ReferenceError: File is not defined في بيئة Railway
+// حل مشكلة البيئة في Railway
 import { File, Blob } from 'node:buffer';
 if (!global.File) global.File = File;
 if (!global.Blob) global.Blob = Blob;
@@ -11,95 +11,96 @@ import ytdl from "ytdl-core";
 const app = express();
 app.use(express.static("public"));
 
-/* ================== YOUTUBE ================== */
+const fetchData = async (url) => {
+    const response = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    return await response.json();
+};
 
-// 🔍 بحث
-app.get("/api/youtube/search", async (req, res) => {
+/* ================== YOUTUBE (تحديث جديد) ================== */
+
+// 1. بحث وتشغيل أغاني مباشرة
+app.get("/api/youtube/play-audio", async (req, res) => {
   try {
     let q = req.query.q;
+    if (!q) return res.json({ error: "اكتب اسم الأغنية" });
     let r = await yts(q);
-    res.json(r.videos.slice(0, 5));
+    let video = r.videos[0]; 
+    res.json({
+      title: video.title,
+      thumbnail: video.thumbnail,
+      audio_url: `/api/youtube/audio-stream?url=${encodeURIComponent(video.url)}`
+    });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "خطأ في تشغيل الأغنية" });
   }
 });
 
-// 🎬 تحميل فيديو
-app.get("/api/youtube/video", async (req, res) => {
+// 2. بحث وتشغيل فيديو مباشرة
+app.get("/api/youtube/play-video", async (req, res) => {
+  try {
+    let q = req.query.q;
+    if (!q) return res.json({ error: "اكتب اسم الفيديو" });
+    let r = await yts(q);
+    let video = r.videos[0];
+    res.json({
+      title: video.title,
+      thumbnail: video.thumbnail,
+      video_url: `/api/youtube/stream?url=${encodeURIComponent(video.url)}`
+    });
+  } catch (e) {
+    res.status(500).json({ error: "خطأ في تشغيل الفيديو" });
+  }
+});
+
+// 3. تحميل يوتيوب بالرابط
+app.get("/api/youtube/download", async (req, res) => {
   try {
     let url = req.query.url;
     let info = await ytdl.getInfo(url);
     res.json({
       title: info.videoDetails.title,
-      download: `/api/youtube/stream?url=${encodeURIComponent(url)}`
+      video: `/api/youtube/stream?url=${encodeURIComponent(url)}`,
+      audio: `/api/youtube/audio-stream?url=${encodeURIComponent(url)}`
     });
   } catch (e) {
-    res.status(500).json({ error: e.message });
+    res.status(500).json({ error: "الرابط غير صحيح أو محمي" });
   }
 });
 
-// 🎧 تحميل صوت
-app.get("/api/youtube/audio", async (req, res) => {
-  res.json({
-    status: true,
-    download: `/api/youtube/audio-stream?url=${encodeURIComponent(req.query.url)}`
-  });
-});
-
-// stream فيديو
+// Stream Helpers
 app.get("/api/youtube/stream", (req, res) => {
-  ytdl(req.query.url, { filter: "audioandvideo" }).pipe(res);
+  ytdl(req.query.url, { filter: "audioandvideo", quality: "highest" }).pipe(res);
 });
 
-// stream صوت
 app.get("/api/youtube/audio-stream", (req, res) => {
   ytdl(req.query.url, { filter: "audioonly" }).pipe(res);
 });
 
-/* ================== TIKTOK ================== */
+/* ================== بقية الخدمات ================== */
 
 app.get("/api/tiktok", async (req, res) => {
   try {
-    let url = req.query.url;
-    let r = await fetch(`https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(url)}`);
-    let d = await r.json();
-    res.json({ video: d.video.noWatermark });
-  } catch (e) {
-    res.status(500).json({ error: "خطأ في جلب بيانات تيك توك" });
-  }
+    let d = await fetchData(`https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(req.query.url)}`);
+    res.json(d);
+  } catch (e) { res.status(500).json({ error: "خطأ في تيك توك" }); }
 });
-
-/* ================== SPOTIFY ================== */
 
 app.get("/api/spotify/search", async (req, res) => {
   try {
-    let q = req.query.q;
-    let r = await fetch(`https://api.ootaizumi.web.id/downloader/spotifyplay?query=${encodeURIComponent(q)}`);
-    let d = await r.json();
+    let d = await fetchData(`https://api.ootaizumi.web.id/downloader/spotifyplay?query=${encodeURIComponent(req.query.q)}`);
     res.json(d);
-  } catch (e) {
-    res.status(500).json({ error: "خطأ في بحث سبوتيفاي" });
-  }
+  } catch (e) { res.status(500).json({ error: "خطأ في سبوتيفاي" }); }
 });
-
-/* ================== PINTEREST ================== */
 
 app.get("/api/pinterest/search", async (req, res) => {
   try {
-    let q = req.query.q;
-    let r = await fetch(`https://pinterest-api-one.vercel.app/?q=${encodeURIComponent(q)}`);
-    let d = await r.json();
+    let d = await fetchData(`https://api.boxi.my.id/api/pinterest?q=${encodeURIComponent(req.query.q)}`);
     res.json(d);
-  } catch (e) {
-    res.status(500).json({ error: "خطأ في بحث بينترست" });
-  }
+  } catch (e) { res.status(500).json({ error: "خطأ في بينترست" }); }
 });
 
-/* ================== MAIN ================== */
-
-app.get("/", (req, res) => {
-  res.sendFile(process.cwd() + "/public/index.html");
-});
+app.get("/", (req, res) => { res.sendFile(process.cwd() + "/public/index.html"); });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🔥 API is running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🔥 Server Running on ${PORT}`));
