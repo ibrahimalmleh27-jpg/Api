@@ -17,8 +17,6 @@
     .btn-action:hover { background: #00cca3; transform: translateY(-2px); }
     .btn-copy { background: #333; color: #fff; border: 1px solid #444; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 0.8rem; }
     .btn-copy:hover { background: #444; }
-    #results { margin-top: 15px; }
-    .result-item { background: #222; padding: 10px; border-radius: 8px; margin-bottom: 5px; border-left: 4px solid #00ffcc; }
   </style>
 </head>
 <body>
@@ -27,7 +25,6 @@
 
 <div class="container">
   
-  <!-- 1. بحث وتشغيل أغاني -->
   <div class="section-card">
     <h2>🎵 1. بحث وتشغيل أغاني (مباشر)</h2>
     <div class="input-group">
@@ -38,7 +35,6 @@
     </div>
   </div>
 
-  <!-- 2. بحث وتشغيل فيديو -->
   <div class="section-card">
     <h2>🎬 2. بحث وتشغيل فيديو (مباشر)</h2>
     <div class="input-group">
@@ -49,7 +45,6 @@
     </div>
   </div>
 
-  <!-- 3. تحميل يوتيوب بالرابط -->
   <div class="section-card">
     <h2>📥 3. تحميل يوتيوب بالرابط</h2>
     <div class="input-group">
@@ -60,7 +55,6 @@
     </div>
   </div>
 
-  <!-- 4. تيك توك -->
   <div class="section-card">
     <h2>📱 4. تحميل تيك توك</h2>
     <div class="input-group">
@@ -71,7 +65,6 @@
     </div>
   </div>
 
-  <!-- 5. سبوتيفاي -->
   <div class="section-card">
     <h2>🎧 5. بحث سبوتيفاي</h2>
     <div class="input-group">
@@ -82,7 +75,6 @@
     </div>
   </div>
 
-  <!-- 6. بينترست -->
   <div class="section-card">
     <h2>📌 6. بحث بينترست</h2>
     <div class="input-group">
@@ -104,6 +96,13 @@ function copy(path){
 
 function fetchAPI(path, inputId){
   const val = document.getElementById(inputId).value;
+  if(!val) return alert("يرجى إدخال نص أو رابط");
+  window.open(path + encodeURIComponent(val), '_blank');
+}
+</script>
+
+</body>
+</html>
   if(!val) return alert("يرجى إدخال نص أو رابط");
   window.open(path + encodeURIComponent(val), '_blank');
 }
