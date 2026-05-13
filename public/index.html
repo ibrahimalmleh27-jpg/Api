@@ -1,65 +1,167 @@
 <!DOCTYPE html>
-<html>
+<html lang="ar" dir="rtl">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>S7ADOW API</title>
   <style>
-    body { font-family: Arial; background:#111; color:#fff; text-align:center }
-    input, button { padding:10px; margin:5px; border:none }
-    button { background:#00ffcc; cursor:pointer }
+    body { 
+      font-family: Arial, sans-serif; 
+      background: #0a0a0a; 
+      color: #fff; 
+      text-align: center; 
+      margin: 0; 
+      padding: 20px; 
+    }
+    h1 { color: #ff4500; margin-bottom: 30px; }
+    h2 { font-size: 1.2rem; color: #00ffcc; border-bottom: 1px solid #333; padding-bottom: 10px; margin-top: 30px; }
+    
+    /* تنسيق الحاويات لتكون تحت بعضها */
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .section-card {
+      background: #1a1a1a;
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid #333;
+    }
+
+    input { 
+      padding: 12px; 
+      width: 80%; 
+      margin-bottom: 10px; 
+      border-radius: 5px; 
+      border: 1px solid #444; 
+      background: #222; 
+      color: #fff; 
+    }
+
+    button { 
+      background: #00ffcc; 
+      color: #000; 
+      font-weight: bold; 
+      padding: 10px 20px; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      transition: 0.3s;
+    }
+    
+    button:hover { background: #00cca3; }
+
+    .api-endpoint {
+      background: #222;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 10px 0;
+      direction: ltr;
+      font-family: monospace;
+      font-size: 0.9rem;
+      color: #00ffcc;
+      word-break: break-all;
+    }
+
+    #results p {
+      background: #222;
+      padding: 10px;
+      border-radius: 5px;
+      margin: 5px 0;
+    }
   </style>
 </head>
 <body>
 
 <h1>🔥 S7ADOW API</h1>
 
-<!-- 🔍 البحث -->
-<h2>بحث يوتيوب</h2>
-<input id="search" placeholder="اكتب اسم">
-<button onclick="searchYT()">بحث</button>
+<div class="container">
+  
+  <div class="section-card">
+    <h2>🔎 بحث يوتيوب</h2>
+    <input id="search" placeholder="اكتب اسم الفيديو هنا...">
+    <button onclick="searchYT()">بحث الآن</button>
+    <div id="results"></div>
+  </div>
 
-<div id="results"></div>
+  <div class="section-card">
+    <h2>📥 تحميل من رابط</h2>
+    <input id="url" placeholder="ضع رابط الفيديو هنا...">
+    <button onclick="downloadVideo()">تحميل فيديو</button>
+  </div>
 
-<!-- 📥 تحميل -->
-<h2>تحميل من رابط</h2>
-<input id="url" placeholder="حط الرابط">
-<button onclick="downloadVideo()">تحميل فيديو</button>
+  <div class="section-card">
+    <h2>🛠️ قائمة الـ APIs المتاحة</h2>
+    
+    <div style="margin-bottom: 25px;">
+      <p>1. بحث يوتيوب</p>
+      <div class="api-endpoint">/api/youtube/search?q=TEXT</div>
+      <button onclick="copy('/api/youtube/search?q=test')">نسخ الرابط</button>
+    </div>
 
-<!-- 🔗 APIs -->
-<h2>APIs</h2>
+    <div style="margin-bottom: 25px;">
+      <p>2. جلب بيانات فيديو</p>
+      <div class="api-endpoint">/api/youtube/video?url=LINK</div>
+      <button onclick="copy('/api/youtube/video?url=link')">نسخ الرابط</button>
+    </div>
 
-<div>
-  <p>/api/youtube/search?q=TEXT</p>
-  <button onclick="copy('/api/youtube/search?q=test')">نسخ</button>
-</div>
+    <div style="margin-bottom: 25px;">
+      <p>3. تحميل تيك توك</p>
+      <div class="api-endpoint">/api/tiktok?url=LINK</div>
+      <button onclick="copy('/api/tiktok?url=link')">نسخ الرابط</button>
+    </div>
 
-<div>
-  <p>/api/youtube/video?url=LINK</p>
-  <button onclick="copy('/api/youtube/video?url=link')">نسخ</button>
+    <div style="margin-bottom: 25px;">
+      <p>4. بحث سبوتيفاي</p>
+      <div class="api-endpoint">/api/spotify/search?q=TEXT</div>
+      <button onclick="copy('/api/spotify/search?q=test')">نسخ الرابط</button>
+    </div>
+
+    <div>
+      <p>5. بحث بينترست</p>
+      <div class="api-endpoint">/api/pinterest/search?q=TEXT</div>
+      <button onclick="copy('/api/pinterest/search?q=test')">نسخ الرابط</button>
+    </div>
+
+  </div>
 </div>
 
 <script>
 function copy(text){
-  navigator.clipboard.writeText(window.location.origin + text)
-  alert("تم النسخ ✅")
+  const fullUrl = window.location.origin + text;
+  navigator.clipboard.writeText(fullUrl);
+  alert("تم النسخ بنجاح ✅");
 }
 
 async function searchYT(){
-  let q = document.getElementById("search").value
-  let res = await fetch("/api/youtube/search?q=" + q)
-  let data = await res.json()
+  let q = document.getElementById("search").value;
+  if(!q) return alert("يرجى كتابة نص للبحث");
+  
+  let res = await fetch("/api/youtube/search?q=" + encodeURIComponent(q));
+  let data = await res.json();
 
-  let html = ""
-  data.forEach(v=>{
+  let html = "";
+  data.forEach(v => {
     html += `<p>${v.title}<br>
-    <button onclick="copy('${v.url}')">نسخ الرابط</button></p>`
-  })
+    <button style="margin-top:5px; padding:5px 10px; font-size:12px" onclick="copyURL('${v.url}')">نسخ رابط الفيديو</button></p>`;
+  });
 
-  document.getElementById("results").innerHTML = html
+  document.getElementById("results").innerHTML = html;
+}
+
+function copyURL(url){
+  navigator.clipboard.writeText(url);
+  alert("تم نسخ رابط الفيديو ✅");
 }
 
 function downloadVideo(){
-  let url = document.getElementById("url").value
-  window.open("/api/youtube/video?url=" + url)
+  let url = document.getElementById("url").value;
+  if(!url) return alert("يرجى وضع رابط");
+  window.open("/api/youtube/video?url=" + encodeURIComponent(url));
 }
 </script>
 
