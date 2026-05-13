@@ -26,20 +26,20 @@
 <div class="container">
   
   <div class="section-card">
-    <h2>🎵 1. بحث وتشغيل أغاني (مباشر)</h2>
+    <h2>🎵 1. بحث وتشغيل أغاني (يوتيوب)</h2>
     <div class="input-group">
       <input id="q-audio" placeholder="اكتب اسم الأغنية...">
-      <button class="btn-action" onclick="fetchAPI('/api/youtube/play-audio?q=', 'q-audio')">تشغيل / فحص</button>
+      <button class="btn-action" onclick="fetchAPI('/api/youtube/play-audio?q=', 'q-audio')">تشغيل مباشر</button>
       <div class="api-endpoint">/api/youtube/play-audio?q=TEXT</div>
       <button class="btn-copy" onclick="copy('/api/youtube/play-audio?q=')">نسخ رابط الـ API 📋</button>
     </div>
   </div>
 
   <div class="section-card">
-    <h2>🎬 2. بحث وتشغيل فيديو (مباشر)</h2>
+    <h2>🎬 2. بحث وتشغيل فيديو (يوتيوب)</h2>
     <div class="input-group">
       <input id="q-video" placeholder="اكتب اسم الفيديو...">
-      <button class="btn-action" onclick="fetchAPI('/api/youtube/play-video?q=', 'q-video')">تشغيل / فحص</button>
+      <button class="btn-action" onclick="fetchAPI('/api/youtube/play-video?q=', 'q-video')">تشغيل مباشر</button>
       <div class="api-endpoint">/api/youtube/play-video?q=TEXT</div>
       <button class="btn-copy" onclick="copy('/api/youtube/play-video?q=')">نسخ رابط الـ API 📋</button>
     </div>
@@ -88,22 +88,18 @@
 </div>
 
 <script>
+// دالة لنسخ الرابط الكامل مع الدومين الحالي
 function copy(path){
   const url = window.location.origin + path;
   navigator.clipboard.writeText(url);
   alert("تم نسخ رابط الـ API ✅");
 }
 
+// دالة لفتح نتائج الـ API الحقيقية من السيرفر
 function fetchAPI(path, inputId){
   const val = document.getElementById(inputId).value;
   if(!val) return alert("يرجى إدخال نص أو رابط");
-  window.open(path + encodeURIComponent(val), '_blank');
-}
-</script>
-
-</body>
-</html>
-  if(!val) return alert("يرجى إدخال نص أو رابط");
+  // يفتح المسار المبرمج في server.js
   window.open(path + encodeURIComponent(val), '_blank');
 }
 </script>
