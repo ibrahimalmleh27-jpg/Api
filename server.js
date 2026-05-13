@@ -199,13 +199,4 @@ const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
   console.log("🔥 Server Running on " + PORT);
-});  try {
-    let d = await fetchData(`https://api.boxi.my.id/api/pinterest?q=${encodeURIComponent(req.query.q)}`);
-    res.json(d);
-  } catch (e) { res.status(500).json({ error: "خطأ في بينترست" }); }
 });
-
-app.get("/", (req, res) => { res.sendFile(process.cwd() + "/public/index.html"); });
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🔥 Server Running on ${PORT}`));
