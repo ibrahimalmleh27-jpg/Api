@@ -20,6 +20,7 @@
             height: 100vh;
             overflow: hidden;
         }
+        /* القائمة الجانبية */
         .sidebar {
             width: 260px;
             background: var(--card);
@@ -46,6 +47,8 @@
             background: var(--accent);
             color: #000;
         }
+
+        /* المحتوى الرئيسي */
         .main {
             flex: 1;
             padding: 30px;
@@ -53,10 +56,12 @@
         }
         .section { display: none; animation: fadeIn 0.4s; }
         .section.active { display: block; }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
+
         .card {
             background: var(--card);
             padding: 25px;
@@ -64,6 +69,7 @@
             max-width: 800px;
             margin: 0 auto;
         }
+
         input {
             width: 100%;
             padding: 12px;
@@ -74,6 +80,7 @@
             margin-bottom: 15px;
             box-sizing: border-box;
         }
+
         button {
             background: var(--accent);
             color: black;
@@ -85,6 +92,7 @@
             width: 100%;
             margin-bottom: 10px;
         }
+
         .api-box {
             background: #000;
             padding: 15px;
@@ -95,6 +103,7 @@
             align-items: center;
             border-right: 4px solid var(--accent);
         }
+
         code { color: #00ffcc; font-size: 0.9em; }
     </style>
 </head>
